@@ -1,48 +1,54 @@
+const envFile = require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
-const app = express();
+const path = require('path');
 
-const actionsObj = require('./actions/actions.js');
-const actionObject = new actionsObj();
+const Promise = require('bluebird');
+fs = Promise.promisifyAll(require('fs'));
+const https = require("https");
+
+let expressValue = express();
+expressValue = Promise.promisifyAll(expressValue);
 
 const storage = multer.diskStorage({
     destination : (req,file,cb) => {
         cb(null,'uploads')
     },
     filename : (req,file,cb) => {
-        console.log(`\n${new Date()} Recieved File: ${file.originalname}`)
+        console.log(`\n${new Date()} Recieved File: ${file.originalname}`);
         cb(null,file.originalname)
     }
-})
-
-const upload = multer({storage:storage}); 
-
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/view/index.html');
 });
 
-app.get('/success', (req, res) => {
-    res.sendFile(__dirname + '/view/success.html');
-});
+const upload = multer({storage:storage});
+let app = {};
+app['upload'] = upload;
+app['path'] = path;
+app['fs'] = fs;
+app['https'] = https;
 
-app.get('/failure', (req, res) => {
-    res.sendFile(__dirname + '/view/failure.html');
-});
+try {
+    let apiInfo = {
+        host: process.env.apiHost,
+        port: process.env.apiPort,
+        routes: {
+            cors: true
+        }
+    };
+    expressValue.listen(apiInfo);
+    console.log('Express Connection Initialized : http://' + process.env.apiHost+':'+process.env.apiPort);
+} catch (e) {
+    console.log('Error @ Express Connection Initialization : ' + e)
+}
+app['express'] = expressValue;
 
-app.post('/upload', upload.single('file-to-upload'), async (req, res) => {
+const controller = require('./routes/controller');
 
-    let response = await actionObject.uploadFile(req,res)
-
-    if(response.status === 200){
-        console.log(`${new Date()} File ${response.data.name} of size ${response.data.size} Uploaded Successfully with Id ${response.data.id} `)
-        res.redirect('/success');
+class AppServer {
+    constructor () {
+        const controllerObject = new controller(app);
+        controllerObject.init()
     }
-    else{
-        console.log(`${new Date()} Error while Uploading File`)
-        res.redirect('/failure');
-    }
+}
 
-});
-
-app.listen(3000, ()=> { console.log("Server Running at http://localhost:3000")});
-
+module.exports = new AppServer();
