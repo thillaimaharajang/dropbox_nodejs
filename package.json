@@ -2,7 +2,7 @@
   "name": "i2i_dropbox",
   "version": "1.0.0",
   "description": "To access the API of dropbox using NodeJS application",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

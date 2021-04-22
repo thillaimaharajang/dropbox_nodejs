@@ -4,8 +4,8 @@ To access dropbox using NodeJS, Express and Dropbox APIs
 Procedure to Check the Module:
 
 1. Run 'npm install'
-2. After the node_modules get installed, Run the 'index.js' 
-   file using 'node index.js' in the project repository
+2. After the node_modules get installed, Run the 'app.js' 
+   file using 'node app.js' in the project repository
 3. Go to the web browser and search 'http://localhost:3000' .
 4. Choose any of the file from your PC and Click on 'Upload'. 
    Note: For testing purpose, I have given 'Test_File.pdf' in the Project Repository.
