@@ -12,4 +12,4 @@ Procedure to Check the Module:
 5. After Uploading, You could see the success REsponse. Otherwise Failure response will be found.
 6. You can find the uploaded file in the Dropbox using the link 'https://www.dropbox.com/login'
 7. Credentials were at .env file
-8. Inside Dropbox, the uploaded file will be at 'Thillai Maharajan/Uploads'
+8. Inside Dropbox, the uploaded file will be at 'Thillai Maharajan/Uploads/'
