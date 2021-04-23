@@ -15,8 +15,11 @@ class Controller {
             res.sendFile(this.path.join(__dirname, '../view', 'index.html'));
         });
 
-        this.app.express.get('/success', (req, res) => {
-            res.sendFile(this.path.join(__dirname, '../view', 'success.html'));
+        this.app.express.get('/successUpload', (req, res) => {
+            res.sendFile(this.path.join(__dirname, '../view', 'successUpload.html'));
+        });
+        this.app.express.get('/successDownload', (req, res) => {
+            res.sendFile(this.path.join(__dirname, '../view', 'successDownload.html'));
         });
 
         this.app.express.get('/failure', (req, res) => {
@@ -24,26 +27,28 @@ class Controller {
         });
 
         this.app.express.post('/upload', this.upload.single('file-to-upload'), async (req, res) => {
-
             try{
-
-                let response = await this.actionsInstance .uploadFile(req,res);
-
-                if(response.id){
-                    console.log(`${new Date()} File ${response.name} of size ${response.size} Uploaded Successfully with Id ${response.id} `)
-                    res.redirect('/success');
-                }
-                else{
-                    console.log(`${new Date()} Error while Uploading File`);
-                    res.redirect('/failure');
-                }
+                console.log(`${new Date()} Request to Upload: ${JSON.stringify(req.body)}`);
+                await this.actionsInstance.uploadFile(req,res);
             }
-
             catch(e){
                 console.log(`${new Date()} Error While Uploading: ${JSON.stringify(e)}`);
                 res.redirect('/failure');
             }
 
+        });
+
+
+        this.app.express.post('/download', async (req, res) => {
+
+            try{
+                console.log(`\n${new Date()} Request to Download: ${JSON.stringify(req.body)}`);
+                await this.actionsInstance.downloadFile(req,res);
+            }
+            catch(e){
+                console.log(`${new Date()} Error While Uploading: ${JSON.stringify(e)}`);
+                res.redirect('/failure');
+            }
         });
     }}
 

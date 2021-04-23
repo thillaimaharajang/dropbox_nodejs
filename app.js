@@ -8,7 +8,8 @@ fs = Promise.promisifyAll(require('fs'));
 const https = require("https");
 
 let expressValue = express();
-expressValue = Promise.promisifyAll(expressValue);
+
+let bodyParser = require('body-parser');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -40,7 +41,11 @@ try {
 } catch (e) {
     console.log('Error @ Express Connection Initialization : ' + e)
 }
+
+expressValue.use(bodyParser.json());
+expressValue.use(bodyParser.urlencoded({ extended: true }));
 app['express'] = expressValue;
+
 
 const controller = require('./routes/controller');
 
