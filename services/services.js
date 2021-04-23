@@ -1,5 +1,4 @@
 const envFile = require('dotenv').config();
-const data = "{\"limit\": 1000}";
 
 class Services {
 
@@ -15,7 +14,8 @@ class Services {
 
         let pathname = './uploads/' + req.file.originalname;
 
-        let data = this.fs.readFileAsync(pathname, 'base64');
+        let uploadData = await this.fs.readFileAsync(pathname);
+        console.log(new Date() + " Uploading file of byte length "+ Buffer.byteLength(uploadData));
 
         const url = 'https://content.dropboxapi.com/2/files/upload';
         const options = {
@@ -29,10 +29,10 @@ class Services {
                     'mute': false,
                     'strict_conflict': false
                 }),
-                'Content-Type': 'application/octet-stream',
+                'Content-Type': 'application/octet-stream'
             }
         };
-        let response =  await self.doUploadRequest(url, options);
+        let response =  await self.doUploadRequest(url, options,uploadData);
         if(response.id){
             console.log(`${new Date()} File ${response.name} of size ${response.size} Uploaded Successfully with Id ${response.id} `)
             res.redirect('/successUpload');
@@ -41,15 +41,18 @@ class Services {
             console.log(`${new Date()} Error while Uploading File`);
             res.redirect('/failure');
         }
-    }
+    };
 
-    doUploadRequest = async (url, options) => {
+    doUploadRequest = async (url, options,uploadData) => {
+
+        // console.log("OPTIONS: ",options);
 
         return new Promise((resolve, reject) => {
 
             try {
                 const req = this.https.request(url, options, (res) => {
                     console.log(`${new Date()} File Uploaded with status code ${res.statusCode}`);
+                    // console.log('response: ',res)
 
                     res.setEncoding('utf8');
                     let responseBody = '';
@@ -67,7 +70,7 @@ class Services {
                     reject(err);
                 });
 
-                req.write(data);
+                req.write(uploadData);
                 req.end();
             } catch (e) {
                 console.log(`${new Date()} Catch at File Uploading ${JSON.stringify(e)}`);
