@@ -6,7 +6,7 @@ class Controller {
         this.app = app;
         this.upload = app.upload;
         this.path = app.path;
-        this.actionsInstance = new servicesObj(app);
+        this.serviceInstance = new servicesObj(app);
     }
 
     init = async () => {
@@ -26,29 +26,14 @@ class Controller {
             res.sendFile(this.path.join(__dirname, '../view', 'failure.html'));
         });
 
-        this.app.express.post('/upload', this.upload.single('file-to-upload'), async (req, res) => {
-            try{
-                console.log(`${new Date()} Request to Upload: ${JSON.stringify(req.body)}`);
-                await this.actionsInstance.uploadFile(req,res);
-            }
-            catch(e){
-                console.log(`${new Date()} Error While Uploading: ${JSON.stringify(e)}`);
-                res.redirect('/failure');
-            }
 
+        this.app.express.post('/upload', this.upload.single('file-to-upload'), async (req, res) => {
+            this.serviceInstance.uploadFile(req,res);
         });
 
 
         this.app.express.post('/download', async (req, res) => {
-
-            try{
-                console.log(`\n${new Date()} Request to Download: ${JSON.stringify(req.body)}`);
-                await this.actionsInstance.downloadFile(req,res);
-            }
-            catch(e){
-                console.log(`${new Date()} Error While Uploading: ${JSON.stringify(e)}`);
-                res.redirect('/failure');
-            }
+            this.serviceInstance.downloadFile(req,res);
         });
     }}
 

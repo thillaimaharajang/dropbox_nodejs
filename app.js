@@ -3,10 +3,8 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 
-const Promise = require('bluebird');
-fs = Promise.promisifyAll(require('fs'));
+const fs= require('fs')
 const https = require("https");
-
 let expressValue = express();
 
 let bodyParser = require('body-parser');
