@@ -9,7 +9,7 @@ class Services {
     }
 
 
-    uploadFile = async (req,res) => {
+    uploadFile = async (req, res) => {
 
         console.log(`${new Date()} Request to Upload: ${JSON.stringify(req.body)}`);
 
@@ -18,6 +18,7 @@ class Services {
         let pathname = './uploads/' + req.file.originalname;
 
         const url = 'https://content.dropboxapi.com/2/files/upload';
+
         const options = {
             method: 'POST',
             headers: {
@@ -32,19 +33,21 @@ class Services {
                 'Content-Type': 'application/octet-stream'
             }
         };
-        let response =  await self.doUploadRequest(url, options,pathname);
-        if(response.id){
+
+        let response = await self.doUploadRequest(url, options, pathname);
+
+        if (response.id) {
             console.log(`${new Date()} File ${response.name} of size ${response.size} Uploaded Successfully with Id ${response.id} `)
             res.redirect('/successUpload');
-        }
-        else{
+        } else {
             console.log(`${new Date()} Error while Uploading File`);
             res.redirect('/failure');
         }
+
     };
 
 
-    doUploadRequest = async (url, options,uploadDataPath) => {
+    doUploadRequest = async (url, options, uploadDataPath) => {
 
         console.log(`${new Date()} Uploading Data from Path ${uploadDataPath}`);
 
@@ -53,6 +56,7 @@ class Services {
             try {
                 const req = this.https.request(url, options, (res) => {
                     console.log(`${new Date()} File Uploaded with status code ${res.statusCode}`);
+
                     res.setEncoding('utf8');
                     let responseBody = '';
 
@@ -69,24 +73,28 @@ class Services {
                     reject(err);
                 });
 
+
                 let chunks = this.fs.createReadStream(uploadDataPath);
 
-                chunks.on('data',function(datachunk){
-                    console.log(new Date()+ " Data Chunk Recieved");
+                chunks.on('data', function (datachunk) {
+                    console.log(new Date() + " Data Chunk Recieved");
                     req.write(datachunk);
                 });
 
-                chunks.on('end',function () {
+                chunks.on('end', function () {
                     req.end();
                 })
+
             } catch (e) {
+
                 console.log(`${new Date()} Catch at File Uploading ${JSON.stringify(e)}`);
+                reject('Error while uploading');
             }
         });
     };
 
 
-    downloadFile = async (req,res) => {
+    downloadFile = async (req, res) => {
 
         console.log(`\n${new Date()} Request to Download: ${JSON.stringify(req.body)}`);
 
@@ -95,25 +103,24 @@ class Services {
         console.log(`${new Date()} Downloading File ${pathname}`);
 
         const url = 'https://content.dropboxapi.com/2/files/download';
+
         const options = {
             method: 'POST',
             headers: {
                 'Authorization': process.env.token,
-                'Dropbox-API-Arg' : JSON.stringify({"path":'/Uploads/'+pathname})
+                'Dropbox-API-Arg': JSON.stringify({"path": '/Uploads/' + pathname})
             }
         };
 
-        try{
-            let response =  await self.doDownloadRequest(url, options, pathname);
-            if(response){
+        try {
+            let response = await self.doDownloadRequest(url, options, pathname);
+            if (response) {
                 res.redirect('/successDownload');
-            }
-            else{
+            } else {
                 console.log(`${new Date()} Error while Downloading File`);
                 res.redirect('/failure');
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.log(`${new Date()} Error while Downloading File ${JSON.stringify(e)}`);
             res.redirect('/failure');
 
@@ -130,7 +137,7 @@ class Services {
                 const req = this.https.request(url, options, (res) => {
                     console.log(`${new Date()} File Downloaded with status code ${res.statusCode}`);
 
-                    if(res.statusCode === 200) {
+                    if (res.statusCode === 200) {
                         res.setEncoding('base64');
                         let responseBody = '';
 
@@ -139,14 +146,15 @@ class Services {
                         });
 
                         res.on('end', () => {
-                            let storagePath = this.path.join(__dirname, '../downloads',fileName);
-                            let a = this.fs.writeFile(storagePath, responseBody,'base64',function(err,data){
+
+                            let storagePath = this.path.join(__dirname, '../downloads', fileName);
+
+                            this.fs.writeFile(storagePath, responseBody, 'base64', function (err, data) {
                                 console.log(`${new Date()} File Stored at ${storagePath}`);
                                 resolve(responseBody);
                             });
                         });
-                    }
-                    else{
+                    } else {
                         reject('File may not be Preset at Dropbox');
                     }
                 });
@@ -156,7 +164,9 @@ class Services {
                 });
 
                 req.end();
+
             } catch (e) {
+
                 console.log(`${new Date()} Catch at File Uploading ${JSON.stringify(e)}`);
                 reject(err);
             }
