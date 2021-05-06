@@ -34,7 +34,7 @@ class Services {
             }
         };
 
-        let response = await self.doUploadRequest(url, options, pathname);
+        let response = await self.doUploadRequest(url, options, pathname,req.file.originalname);
 
         if (response.id) {
             console.log(`${new Date()} File ${response.name} of size ${response.size} Uploaded Successfully with Id ${response.id} `)
@@ -47,15 +47,22 @@ class Services {
     };
 
 
-    doUploadRequest = async (url, options, uploadDataPath) => {
+    doUploadRequest = async (url, options, uploadDataPath,originalname) => {
 
         console.log(`${new Date()} Uploading Data from Path ${uploadDataPath}`);
 
         return new Promise(async (resolve, reject) => {
 
             try {
-                const req = this.https.request(url, options, (res) => {
+                const req = this.https.request(url, options, async (res) => {
                     console.log(`${new Date()} File Uploaded with status code ${res.statusCode}`);
+
+                    try{
+                        await this.getPreview(originalname)
+                    }
+                    catch (e) {
+                        console.log(`${new Date()} File Preview Catch Data ${e}`);
+                    }
 
                     res.setEncoding('utf8');
                     let responseBody = '';
@@ -93,6 +100,57 @@ class Services {
         });
     };
 
+    getPreview = async (fileName) => {
+
+        const url = 'https://content.dropboxapi.com/2/files/get_preview';
+
+        const options = {
+            method: 'POST',
+            headers: {
+                'Authorization': process.env.token,
+                'Dropbox-API-Arg': JSON.stringify({
+                    'path': '/Uploads/' + fileName
+                })
+            }
+        };
+        // console.log(new Date() + " Options" + JSON.stringify(options));
+
+        return new Promise((resolve, reject) => {
+
+            try {
+                const req = this.https.request(url, options, (res) => {
+                    console.log(`${new Date()} File Preview Call ended with status code ${JSON.stringify(res.statusCode)}`);
+
+                    if (res.statusCode === 200) {
+                        res.setEncoding('base64');
+                        let responseBody = '';
+
+                        res.on('data', (chunk) => {
+                            responseBody += chunk;
+                        });
+
+                        res.on('end', () => {
+                            console.log(new Date() + " File Preview Result: ", responseBody)
+                            resolve(responseBody)
+                        });
+                    } else {
+                        reject('File Format Must be of .ai, .doc, .docm, .docx, .eps, .gdoc, .gslides, .odp, .odt, .pps, .ppsm, .ppsx, .ppt, .pptm, .pptx, .rtf.');
+                    }
+                });
+
+                req.on('error', (err) => {
+                    reject(err);
+                });
+
+                req.end();
+
+            } catch (e) {
+
+                console.log(`${new Date()} Catch at File Uploading ${JSON.stringify(e)}`);
+                reject(err);
+            }
+        });
+    };
 
     downloadFile = async (req, res) => {
 
@@ -172,6 +230,7 @@ class Services {
             }
         });
     };
+
 
 }
 
