@@ -21,6 +21,9 @@ class Controller {
         this.app.express.get('/successDownload', (req, res) => {
             res.sendFile(this.path.join(__dirname, '../view', 'successDownload.html'));
         });
+        this.app.express.get('/successCount', (req, res) => {
+            res.sendFile(this.path.join(__dirname, '../view', 'successCount.html'));
+        });
 
         this.app.express.get('/failure', (req, res) => {
             res.sendFile(this.path.join(__dirname, '../view', 'failure.html'));
@@ -34,6 +37,10 @@ class Controller {
 
         this.app.express.post('/download', async (req, res) => {
             this.serviceInstance.downloadFile(req,res);
+        });
+
+        this.app.express.post('/files_count', async (req, res) => {
+            this.serviceInstance.getFilesList(req,res);
         });
     }}
 

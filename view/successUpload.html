@@ -22,16 +22,28 @@
 <body>
 <p>File Uploaded Successfully. Please Choose another file to Upload</p>
 <h1>Upload Your File to Thillai's Drop Box</h1>
+<p>The File you are uploading will be saved on <b>Uploads</b> folder of Dropbox</p>
 <form action="/upload" enctype="multipart/form-data" method="post">
     <input type="file" name="file-to-upload" onchange="previewFile(this)"><br><br>
     <img id="previewImg" src="/examples/images/transparent.png" alt="Placeholder"><br><br>
     <input type="submit" value="Upload">
 </form><br><br>
 <h1>Download a File from Thillai's Drop Box</h1>
-<p>Please enter a file name correctly as it is in the Dropbox</p>
+<p>Please enter a file name correctly as it is in the Dropbox. If the File is in Uploads Folder, just enter the File name. </p>
+<p>If it is inside any other folders give the foldername also like <b>"google/thillai_maharajan.jpg"</b></p>
 <form action="/download" enctype="application/x-www-form-urlencoded" method="post">
-    <input type="text" name="fileName"><br><br>
+    <input type="text" name="fileName" value = "Thillai Maharajan.jpg"><br><br>
     <input type="submit" value="Download">
-</form>
+</form><br><br>
+
+<h1>Find Number of Files in your Drop Box</h1>
+<p>Please enter a folder name correctly as it is in the Dropbox</p>
+<p>If you want to find all the Files, Please left the <b>Input box Empty.</b></p>
+<p>If you want to find by Folder, Please enter as <b>/uploads</b></p>
+<form action="/files_count" enctype="application/x-www-form-urlencoded" method="post">
+    <input type="text" name="folder" value="/uploads"><br><br>
+    <input type="submit" value="Count Files">
+</form><br><br>
+
 </body>
 </html>

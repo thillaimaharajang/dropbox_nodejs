@@ -1,4 +1,7 @@
 const envFile = require('dotenv').config();
+const axios = require('axios').default;
+const Promise = require('bluebird');
+
 
 class Services {
 
@@ -6,6 +9,7 @@ class Services {
         this.https = app.https;
         this.fs = app.fs;
         this.path = app.path;
+        this.accumulator =[]
     }
 
 
@@ -34,7 +38,7 @@ class Services {
             }
         };
 
-        let response = await self.doUploadRequest(url, options, pathname,req.file.originalname);
+        let response = await self.doUploadRequest(url, options, pathname, req.file.originalname);
 
         if (response.id) {
             console.log(`${new Date()} File ${response.name} of size ${response.size} Uploaded Successfully with Id ${response.id} `)
@@ -46,8 +50,7 @@ class Services {
 
     };
 
-
-    doUploadRequest = async (url, options, uploadDataPath,originalname) => {
+    doUploadRequest = async (url, options, uploadDataPath, originalname) => {
 
         console.log(`${new Date()} Uploading Data from Path ${uploadDataPath}`);
 
@@ -57,10 +60,9 @@ class Services {
                 const req = this.https.request(url, options, async (res) => {
                     console.log(`${new Date()} File Uploaded with status code ${res.statusCode}`);
 
-                    try{
+                    try {
                         await this.getPreview(originalname)
-                    }
-                    catch (e) {
+                    } catch (e) {
                         console.log(`${new Date()} File Preview Catch Data ${e}`);
                     }
 
@@ -231,6 +233,102 @@ class Services {
         });
     };
 
+    getFilesList = async (req, res) => {
+
+        console.log(`\n${new Date()} Request to Get the List of Files: ${JSON.stringify(req.body)}`);
+
+        let response = await this.findListOfFiles(req.body.folder);
+
+        if (response) {
+
+            console.log("\n"+new Date()+ " Total Files Count: ",this.accumulator.length);
+            console.log(new Date()+ " Files: ",this.accumulator);
+            this.accumulator=[];
+
+            res.redirect('/successCount');
+        } else {
+            console.log(`${new Date()} Error while Counting File`);
+            res.redirect('/failure');
+        }
+
+    };
+
+    findListOfFiles = async (folderName) => {
+
+        let finalArray = [];
+
+        let self = this;
+
+        let path = "";
+        if(folderName && folderName !== "/") {
+
+            if(folderName[0]=== '/')path = folderName.toLowerCase();
+            else path = '/'+folderName.toLowerCase();
+
+        }
+        console.log(`${new Date()} Getting Files from ${path}`);
+
+        const url = 'https://api.dropboxapi.com/2/files/list_folder';
+
+        let body = {
+            "path": path,
+            "recursive": false,
+            "include_media_info": false,
+            "include_deleted": false,
+            "include_has_explicit_shared_members": false,
+            "include_mounted_folders": true,
+            "include_non_downloadable_files": true
+        };
+
+        const options = {
+            method: 'POST',
+            headers: {
+                'Authorization': process.env.token,
+                'Content-Type': "application/json"
+            },
+            data: body,
+            url
+        };
+
+        // console.log("Options :", options);
+
+        try {
+
+            return await axios(options)
+
+                .then(async (result) => {
+
+                    if (result.status === 200) {
+
+                        console.log(new Date() + " RESULT FOR FILE LIST POST CALL : " + JSON.stringify(result.data));
+                        return await Promise.all(result.data.entries.map(async (oneData) => {
+                            if (oneData['.tag'] === 'file') {
+                                console.log(new Date() + " Name of File", oneData.name);
+                                this.accumulator.push(oneData.name);
+                                return oneData.name
+                            } else if (oneData['.tag'] === 'folder') {
+                                console.log("\n" + new Date() + " Folder: ", oneData.name);
+                                return await this.findListOfFiles(oneData.path_lower);
+                            }
+                        }));
+
+                    } else {
+                        console.log(new Date() + " REQUEST FAILED WITH SATUS CODE : " + JSON.stringify(result.staus))
+                        throw result;
+                    }
+                })
+                .catch((e) => {
+
+                    console.log(new Date() + " ERROR: ", e.response.data);
+                    return e.response;
+
+                })
+
+        } catch (e) {
+            console.log(`${new Date()} Catch at File Uploading ${JSON.stringify(e)}`);
+            return e;
+        }
+    };
 
 }
 

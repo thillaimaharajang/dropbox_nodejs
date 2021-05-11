@@ -20,7 +20,8 @@
     </script>
 </head>
 <body>
-<p>Countered an Error while Uploading/Downloading File. Please try to Re-upload the file. Or Enter the Correct Name of the File to Download</p>
+<p>Counting the Files was <b>Successfully completed</b> and the Result will be in your <b>Application Log</b></p>
+<p>Getting the Data to UI is in Development. As of now you can see the result in your log file</p>
 
 <h1>Upload Your File to Thillai's Drop Box</h1>
 <p>The File you are uploading will be saved on <b>Uploads</b> folder of Dropbox</p>
@@ -28,7 +29,7 @@
     <input type="file" name="file-to-upload" onchange="previewFile(this)"><br><br>
     <img id="previewImg" src="/examples/images/transparent.png" alt="Placeholder"><br><br>
     <input type="submit" value="Upload">
-</form><br>
+</form><br><br>
 
 <h1>Download a File from Thillai's Drop Box</h1>
 <p>Please enter a file name correctly as it is in the Dropbox. If the File is in Uploads Folder, just enter the File name. </p>
@@ -36,7 +37,7 @@
 <form action="/download" enctype="application/x-www-form-urlencoded" method="post">
     <input type="text" name="fileName" value = "Thillai Maharajan.jpg"><br><br>
     <input type="submit" value="Download">
-</form>
+</form><br><br>
 
 <h1>Find Number of Files in your Drop Box</h1>
 <p>Please enter a folder name correctly as it is in the Dropbox</p>
@@ -45,7 +46,6 @@
 <form action="/files_count" enctype="application/x-www-form-urlencoded" method="post">
     <input type="text" name="folder" value="/uploads"><br><br>
     <input type="submit" value="Count Files">
-</form>
-
+</form><br><br>
 </body>
 </html>
